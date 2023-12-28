@@ -1,5 +1,5 @@
 ---
-title: "synthea"
+title: ""
 engine: knitr
 format: html
 editor: visual
@@ -72,7 +72,20 @@ I will compared summary stat of observational studies to the synthea data
 ### Synthea data generated
 
 ```{r}
+#| eval: false
+
 library(tidyverse)
+library(readxl)
+https://docs.google.com/spreadsheets/d/1i9-Zwt2hcG9ghGW7arVEMYJAdQ2Et4hcHf8rquO1Bkg/edit?usp=share_link
+
+# Patientes
+drive_deauth()
+drive_user()
+public_file <-  drive_get(as_id("1i9-Zwt2hcG9ghGW7arVEMYJAdQ2Et4hcHf8rquO1Bkg"))
+drive_download(public_file, overwrite = TRUE)
+patients <- read_excel("patients.xlsx")
+
+
 setwd("~/synthea")
 patient <- read_csv("output/csv/patients.csv")
 observations <- read_csv("output/csv/observations.csv")
@@ -83,7 +96,13 @@ dta <- patient %>%
   filter(CODE == 254837009, GENDER == 'F') %>% 
   mutate(age = round(as.numeric((START - BIRTHDATE)/365.25),0))
 
+https://docs.google.com/spreadsheets/d/1i9-Zwt2hcG9ghGW7arVEMYJAdQ2Et4hcHf8rquO1Bkg/edit?usp=share_link
+drive_deauth()
+drive_user()
+public_file <-  drive_get(as_id("1i9-Zwt2hcG9ghGW7arVEMYJAdQ2Et4hcHf8rquO1Bkg"))
+drive_download(public_file, overwrite = TRUE)
 
+patients <- read_excel("patients.xlsx")
 
 ```
 
@@ -98,6 +117,7 @@ Age group according the module
 | 85 - 140 | 5.26        |
 
 ```{r}
+#| eval: false
 
 dta <- dta %>% 
   mutate(age2 = case_when(
