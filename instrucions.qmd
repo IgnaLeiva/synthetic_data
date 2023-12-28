@@ -1,0 +1,109 @@
+---
+title: "synthea"
+engine: knitr
+format: html
+editor: visual
+---
+
+## Synthea
+
+Synthetic data ([website](https://github.com/synthetichealth/synthea/wiki))
+
+## Run the code
+
+Codes are running in terminal (R or Mac)
+
+In my laptop:
+
+`cd /Users/igna/synthea` to reference the synthea folder
+
+Then, using `./run_synthea` patients' characteristics are passed over.
+
+`p` population, `g` gender, `a` age, `s` seed
+
+```{r}
+#| eval: false
+./run_synthea Massachusetts -p 10000 -g F -a 18-70 -s 1234 --exporter.csv.export=true -- exporter.fhir.export=false --exporter.years_of_history=0
+
+
+./run_synthea Massachusetts -p 10000 -s 1234 --exporter.csv.export=true -- exporter.fhir.export=false --exporter.years_of_history=0
+
+```
+
+Other options
+
+`--exporter.years_of_history` are the number of years of history to keep in exported records, anything older than this may be filtered out. By default it's set at 10 year. If it's set to years_of_history = 0, it will skip filtering altogether and keep the entire history.
+
+```{r}
+#| eval: false
+./run_synthea Massachusetts -p 1000 -g F -a 18-70 -s 123 --exporter.csv.export=true --exporter.years_of_history=3
+```
+
+Since Synthea generates the entire person's life, `--generate.only_alive_patients=true` can be set for reducing the amount of data.
+
+Breast cancer module,
+
+Submodules (dependencies):
+
+1.  breast_cancer/tnm_diagnosis
+
+2.  breast_cancer/hormone_diagnosis
+
+3.  breast_cancer/surgery_therapy_breast ---\> breast_cancer/chemotherapy_breast
+
+4.  breast_cancer/hormonetherapy_breast
+
+**Demographic** can be modified to any desired country.
+
+other regions: https://github.com/synthetichealth/synthea-international. The `gb/src/main/resources/geography/demographics.csv` contains some of the socioeconomic factors described [here](https://github.com/synthetichealth/synthea/wiki/Demographics-for-Other-Areas#demographics-file-format), 
+
+Every module in Synthea runs every single time step, starting with birth of the patient. then important to create delys or guards. Then if not the even can happen at the new born estate then the patien grew up and when taking the history (up to 10 years) the registry is lost.
+
+## Example
+
+`./run_synthea Massachusetts -p 1000 -s 1234 --exporter.csv.export=true -- exporter.fhir.export=false --exporter.years_of_history=0`
+
+`./run_synthea Massachusetts -p 10000 -s 1234 -m breast_cancer --exporter.csv.export=true -- exporter.fhir.export=false --exporter.years_of_history=0`
+
+I will compared summary stat of observational studies to the synthea data
+
+[Breast cancer in women: a descriptive analysis of the national cancer database](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC7569667/): National Cancer Database (NCDB). Women diagnosed between 2004 to 2015.
+
+### Synthea data generated
+
+```{r}
+library(tidyverse)
+setwd("~/synthea")
+patient <- read_csv("output/csv/patients.csv")
+observations <- read_csv("output/csv/observations.csv")
+conditions <- read_csv("output/csv/conditions.csv")
+
+dta <- patient %>% 
+  inner_join(conditions, by = join_by(Id == PATIENT)) %>% 
+  filter(CODE == 254837009, GENDER == 'F') %>% 
+  mutate(age = round(as.numeric((START - BIRTHDATE)/365.25),0))
+
+
+
+```
+
+Age group according the module
+
+| Group    | Probability |
+|----------|-------------|
+| 0 - 39   | 4.54        |
+| 39 - 59  | 35.49       |
+| 60 - 69  | 28.80       |
+| 69 - 85  | 25.91       |
+| 85 - 140 | 5.26        |
+
+```{r}
+
+dta <- dta %>% 
+  mutate(age2 = case_when(
+    age <= 40 ~ '<40',
+    age > 40 & age < 61 ~ '40 - 60',
+    age >= 60 ~ '>60'
+  ))
+prop.table(table(dta$age2))
+```
