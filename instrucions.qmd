@@ -19,7 +19,7 @@ In my laptop:
 
 Then, using `./run_synthea` patients' characteristics are passed over.
 
-`p` population, `g` gender, `a` age, `s` seed
+`p` population, `g` gender, `a` age, `s` seed.
 
 ```{r}
 #| eval: false
