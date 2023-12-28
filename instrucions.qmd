@@ -69,40 +69,24 @@ I will compared summary stat of observational studies to the synthea data
 
 [Breast cancer in women: a descriptive analysis of the national cancer database](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC7569667/): National Cancer Database (NCDB). Women diagnosed between 2004 to 2015.
 
-### Synthea data generated
+### Synthea data generated\@
 
 ```{r}
 #| eval: false
 
 library(tidyverse)
-library(readxl)
-https://docs.google.com/spreadsheets/d/1i9-Zwt2hcG9ghGW7arVEMYJAdQ2Et4hcHf8rquO1Bkg/edit?usp=share_link
+# Data was generated in my personal machine but csv file uploaded to heibox
+patients <-  read_csv(url('https://heibox.uni-heidelberg.de/f/b87129489b0f4e4ba37c/?dl=1'))
 
-# Patientes
-drive_deauth()
-drive_user()
-public_file <-  drive_get(as_id("1i9-Zwt2hcG9ghGW7arVEMYJAdQ2Et4hcHf8rquO1Bkg"))
-drive_download(public_file, overwrite = TRUE)
-patients <- read_excel("patients.xlsx")
+observations <- read_csv(url("https://heibox.uni-heidelberg.de/f/2bdf08577a2a43f784ab/?dl=1"))
 
+conditions <- read_csv(url("https://heibox.uni-heidelberg.de/f/308cddf8e9da4236b26b/?dl=1"))
 
-setwd("~/synthea")
-patient <- read_csv("output/csv/patients.csv")
-observations <- read_csv("output/csv/observations.csv")
-conditions <- read_csv("output/csv/conditions.csv")
-
-dta <- patient %>% 
+dta <- patients %>% 
   inner_join(conditions, by = join_by(Id == PATIENT)) %>% 
   filter(CODE == 254837009, GENDER == 'F') %>% 
   mutate(age = round(as.numeric((START - BIRTHDATE)/365.25),0))
 
-https://docs.google.com/spreadsheets/d/1i9-Zwt2hcG9ghGW7arVEMYJAdQ2Et4hcHf8rquO1Bkg/edit?usp=share_link
-drive_deauth()
-drive_user()
-public_file <-  drive_get(as_id("1i9-Zwt2hcG9ghGW7arVEMYJAdQ2Et4hcHf8rquO1Bkg"))
-drive_download(public_file, overwrite = TRUE)
-
-patients <- read_excel("patients.xlsx")
 
 ```
 
