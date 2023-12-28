@@ -1,5 +1,5 @@
 ---
-title: "synthea"
+title: ""
 engine: knitr
 format: html
 editor: visual
@@ -72,6 +72,8 @@ I will compared summary stat of observational studies to the synthea data
 ### Synthea data generated
 
 ```{r}
+#| eval: false
+
 library(tidyverse)
 setwd("~/synthea")
 patient <- read_csv("output/csv/patients.csv")
@@ -98,6 +100,7 @@ Age group according the module
 | 85 - 140 | 5.26        |
 
 ```{r}
+#| eval: false
 
 dta <- dta %>% 
   mutate(age2 = case_when(
